@@ -1,31 +1,46 @@
 import { createNoise2D } from 'simplex-noise';
 
 export const TILE_SIZE = 32;
-export const MAP_WIDTH = 64;
-export const MAP_HEIGHT = 64;
+export const MAP_WIDTH = 80; // 地图变大一点
+export const MAP_HEIGHT = 60;
 
-// 地形类型定义
+// 扩展地形定义
 export enum TileType {
   DEEP_WATER = 0x1e3799,
   WATER = 0x4a69bd,
   SAND = 0xf6e58d,
-  GRASS = 0x78e08f,
-  FOREST = 0x079992,  // 森林 (可砍伐)
-  MOUNTAIN = 0x60a3bc,// 岩石 (可挖掘)
+  GRASS = 0x2ecc71,      // 调整为更鲜艳的草地
+  FOREST = 0x27ae60,
+  MOUNTAIN = 0x95a5a6,
   SNOW = 0xffffff,
-  FLOOR = 0x57606f,   // 挖开后的地板
-  STUMP = 0x8d6e63,   // 砍倒后的树桩
+  
+  // 人工建筑
+  FLOOR_STONE = 0x7f8c8d,
+  FLOOR_WOOD = 0xd35400,
+  WALL_STONE = 0x2c3e50, // 深色石墙
+  WALL_WOOD = 0xa04000,  // 深色木墙
+  STUMP = 0x8d6e63,
 }
 
-// 矮人数据结构
+// 矮人名字库
+const DWARF_NAMES = ["Urist", "Zon", "Bomrek", "Kogan", "Dastot", "Mebzuth", "Iden", "Sodel"];
+const DWARF_SURNAMES = ["Ironfist", "Alelover", "Rockseeker", "Goldbeard", "Axebreaker", "Deepdelver"];
+
+export function getRandomName() {
+  return `${DWARF_NAMES[Math.floor(Math.random() * DWARF_NAMES.length)]} ${DWARF_SURNAMES[Math.floor(Math.random() * DWARF_SURNAMES.length)]}`;
+}
+
 export interface Dwarf {
   id: number;
+  name: string;
   x: number;
   y: number;
   color: number;
-  state: 'IDLE' | 'MOVING' | 'WORKING';
-  targetIndex?: number; // 目标格子的索引
-  workTimer: number;    // 工作倒计时
+  state: 'IDLE' | 'MOVING' | 'WORKING' | 'BUILDING';
+  targetIndex?: number;
+  workTimer: number;
+  // 简单的需求系统
+  energy: number; // 0-100
 }
 
 export function generateMap(seed: number) {
@@ -39,18 +54,18 @@ export function generateMap(seed: number) {
 
   for (let y = 0; y < MAP_HEIGHT; y++) {
     for (let x = 0; x < MAP_WIDTH; x++) {
-      const elevation = noise2D(x / 15, y / 15);
+      const elevation = noise2D(x / 20, y / 20); // 噪声系数调整，地形更平缓
       let color = TileType.GRASS;
 
       if (elevation < -0.6) color = TileType.DEEP_WATER;
-      else if (elevation < -0.2) color = TileType.WATER;
-      else if (elevation < -0.1) color = TileType.SAND;
-      else if (elevation < 0.3) {
+      else if (elevation < -0.25) color = TileType.WATER;
+      else if (elevation < -0.15) color = TileType.SAND;
+      else if (elevation < 0.35) {
         color = TileType.GRASS;
         spawnPoint = { x: x * TILE_SIZE, y: y * TILE_SIZE };
       }
-      else if (elevation < 0.6) color = TileType.FOREST;
-      else if (elevation < 0.8) color = TileType.MOUNTAIN;
+      else if (elevation < 0.65) color = TileType.FOREST;
+      else if (elevation < 0.85) color = TileType.MOUNTAIN;
       else color = TileType.SNOW;
 
       tiles.push(color);
