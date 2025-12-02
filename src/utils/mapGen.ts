@@ -4,26 +4,28 @@ export const TILE_SIZE = 32;
 export const MAP_WIDTH = 64;
 export const MAP_HEIGHT = 64;
 
+// 地形类型定义
 export enum TileType {
   DEEP_WATER = 0x1e3799,
   WATER = 0x4a69bd,
   SAND = 0xf6e58d,
   GRASS = 0x78e08f,
-  FOREST = 0x079992, // 树木 (可砍伐)
+  FOREST = 0x079992,  // 森林 (可砍伐)
   MOUNTAIN = 0x60a3bc,// 岩石 (可挖掘)
   SNOW = 0xffffff,
-  FLOOR = 0x57606f,   // 被挖开后的地板
-  STUMP = 0x8d6e63,   // 树桩
+  FLOOR = 0x57606f,   // 挖开后的地板
+  STUMP = 0x8d6e63,   // 砍倒后的树桩
 }
 
+// 矮人数据结构
 export interface Dwarf {
   id: number;
   x: number;
   y: number;
   color: number;
   state: 'IDLE' | 'MOVING' | 'WORKING';
-  targetIndex?: number; // 目标的格子索引
-  workTimer: number;    // 工作还需要多久完成
+  targetIndex?: number; // 目标格子的索引
+  workTimer: number;    // 工作倒计时
 }
 
 export function generateMap(seed: number) {
